@@ -18,9 +18,10 @@ RUN npm ci --ignore-scripts --no-audit --no-fund \
  && rm -f dist/jsspeccy/*.map
 
 # ---------- 2) runtime: nginx bez root práv ----------
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+# stable-alpine sa priebežne aktualizuje (1.27 už nie); apk upgrade dotiahne opravy, o ktoré obraz mešká
+FROM nginxinc/nginx-unprivileged:stable-alpine
 USER root
-RUN rm -f /etc/nginx/conf.d/default.conf
+RUN apk upgrade --no-cache && rm -f /etc/nginx/conf.d/default.conf
 USER 101
 # bez application/wasm v mime.types by sa emulátor nespustil -> radšej zlyhať pri builde
 RUN grep -q 'application/wasm' /etc/nginx/mime.types
