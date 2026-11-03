@@ -1,6 +1,7 @@
 # Coolify: Build Pack = Docker Compose. Žiadne porty na hosta, žiadne tajomstvá, žiadne volumes.
-# Doménu (didaktik.system15.win, port 8080) nastav v Coolify UI pre službu "didaktik"
-# - Traefik labely pridá Coolify sám.
+# Doménu v Coolify pre službu "didaktik" NEnastavuj: Traefik routre sú tu nižšie, aby nevznikla
+# žiadna trasa bez SSO (Coolify by vygeneroval HTTPS router bez autentifikácie).
+# Sieť vipu0z3vpalax7nx6ej0glgx = projektová sieť z Coolify (uuid aplikácie), coolify-proxy je v nej.
 services:
   didaktik:
     build:
@@ -19,6 +20,22 @@ services:
     pids_limit: 100
     mem_limit: 128m
     cpus: 0.5
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=vipu0z3vpalax7nx6ej0glgx
+      - traefik.http.services.didaktik.loadbalancer.server.port=8080
+      - traefik.http.middlewares.didaktik-redirect-https.redirectscheme.scheme=https
+      - traefik.http.routers.didaktik-http.entryPoints=http
+      - traefik.http.routers.didaktik-http.rule=Host(`didaktik.system15.win`)
+      - traefik.http.routers.didaktik-http.middlewares=didaktik-redirect-https
+      - traefik.http.routers.didaktik-http.service=didaktik
+      - traefik.http.routers.didaktik-https.entryPoints=https
+      - traefik.http.routers.didaktik-https.rule=Host(`didaktik.system15.win`)
+      # SSO (tinyauth + Pocket ID) priamo na jedinom HTTPS routri -> bez neautentifikovanej alternatívy
+      - traefik.http.routers.didaktik-https.middlewares=sso@file
+      - traefik.http.routers.didaktik-https.service=didaktik
+      - traefik.http.routers.didaktik-https.tls=true
+      - traefik.http.routers.didaktik-https.tls.certresolver=letsencrypt
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
       interval: 30s

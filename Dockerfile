@@ -12,6 +12,9 @@ RUN npm pack "jsspeccy@${JSSPECCY_VERSION}" --silent \
 # lockfile pripne aj build závislosti (webpack, assemblyscript...)
 COPY jsspeccy-build/package-lock.json src/package-lock.json
 WORKDIR /work/src
+# npm-watch (len "npm run watch" pri vývoji) ťahá nodemon/minimatch/semver so známymi advisories;
+# na build netreba -> vyhodiť z package.json (lockfile je vygenerovaný bez neho)
+RUN npm pkg delete devDependencies.npm-watch
 RUN npm ci --ignore-scripts --no-audit --no-fund \
  && mkdir -p build dist \
  && npm run build:release \

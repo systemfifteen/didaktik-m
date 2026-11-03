@@ -39,10 +39,12 @@ Coolify -> Deployments -> redeploy predchádzajúceho commitu, alebo resource za
 
 ## Aktualizácia emulátora
 V `Dockerfile` zmeň `JSSPECCY_VERSION` + `JSSPECCY_SHA512` (`npm view jsspeccy@X dist.integrity` alebo `sha512sum` tarballu),
-regeneruj `jsspeccy-build/package-lock.json` (rozbaľ balík, `npm install --package-lock-only --ignore-scripts`, skopíruj lock) a spusti `test/smoke.py`.
+regeneruj `jsspeccy-build/package-lock.json` (rozbaľ balík, `npm pkg delete devDependencies.npm-watch`, `npm install --package-lock-only --ignore-scripts`, `npm audit --package-lock-only`, skopíruj lock) a spusti `test/smoke.py` (po prihlásení cez SSO, napr. s cookie session).
 
 ## Poznámky k bezpečnosti
 - CSP: `default-src 'none'`, skripty/štýly len z vlastného originu, `'wasm-unsafe-eval'` kvôli WebAssembly jadru emulátora; bez externých požiadaviek.
 - Nepoužívať v `server{}` vlastný blok `types {}` – prepíše všetky MIME typy (JS/CSS by išli ako `octet-stream` a `nosniff` ich zablokuje).
-- Základné obrazy sú pinnuté na tag (`node:22-alpine`, `nginx-unprivileged:1.27-alpine`), nie na digest. Pre prísnejší supply-chain pinning doplniť digesty.
-- Verejná stránka bez prihlásenia (obsah je neškodný). Ak chceš SSO, pridať tinyauth middleware v Coolify rovnako ako pri ostatných `*.system15.win`.
+- Základné obrazy idú zámerne na pohyblivé tagy (`node:22-alpine`, `nginx-unprivileged:stable-alpine` + `apk upgrade`), aby redeploy dotiahol bezpečnostné opravy. Rovnaký commit teda môže dať iný obraz: pre rollback si zapamätaj digest/tag bežiaceho obrazu (`docker inspect`), nielen commit.
+- Prístup len cez SSO (tinyauth + Pocket ID). Traefik labely sú v `docker-compose.yml` (jediný HTTPS router s `sso@file`); v Coolify **nenastavuj doménu**, inak vygeneruje druhý HTTPS router bez autentifikácie.
+- nginx berie skutočnú IP klienta z `X-Forwarded-For` len z Docker sietí (rate limit per klient, nie per proxy).
+- Statické súbory nemajú hash v názve, preto `expires epoch` (vždy revalidácia cez ETag → 304).
