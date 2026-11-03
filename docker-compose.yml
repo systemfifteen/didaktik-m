@@ -1,0 +1,27 @@
+# Coolify: Build Pack = Docker Compose. Žiadne porty na hosta, žiadne tajomstvá, žiadne volumes.
+# Doménu (didaktik.system15.win, port 8080) nastav v Coolify UI pre službu "didaktik"
+# - Traefik labely pridá Coolify sám.
+services:
+  didaktik:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "8080"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 100
+    mem_limit: 128m
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

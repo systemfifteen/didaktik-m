@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex">
+  <title>Didaktik M — emulátor</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <h1>DIDAKTIK <b>M</b></h1>
+      <p class="sub">emulátor ZX Spectrum 48K &middot; V.D. Skalica, Československo</p>
+    </header>
+
+    <section class="case" aria-label="Emulátor">
+      <div class="bezel">
+        <div class="screen" id="screen">
+          <div id="jsspeccy" class="host"></div>
+          <noscript><p class="msg">Emulátor potrebuje zapnutý JavaScript.</p></noscript>
+          <p class="msg" id="msg" hidden></p>
+        </div>
+      </div>
+      <div class="bar">
+        <span class="led" aria-hidden="true"></span>
+        <span id="status">načítavam…</span>
+        <label class="crt"><input type="checkbox" id="crt" checked> CRT efekt</label>
+      </div>
+    </section>
+
+    <section class="help">
+      <h2>Ako na to</h2>
+      <ul>
+        <li><b>Spustenie:</b> klikni na veľké tlačidlo play v emulátore (prehliadače povoľujú zvuk až po kliknutí).</li>
+        <li><b>Hra z pásky:</b> v lište emulátora zvoľ <i>Open file</i> a vyber <code>.tap</code>, <code>.tzx</code>, <code>.z80</code>, <code>.sna</code> alebo <code>.zip</code>. Súbor sa číta iba v tvojom prehliadači, na server sa nič neodosiela.</li>
+        <li><b>Ovládanie:</b> klávesnica počítača, Shift = Caps Shift, Ctrl = Symbol Shift. Klasické hry používajú <code>5 6 7 8</code> (šípky) a <code>0</code> (oheň).</li>
+        <li><b>BASIC:</b> <code>J</code> = LOAD, potom <code>Ctrl+P</code> dvakrát (= <code>""</code>) a Enter.</li>
+      </ul>
+    </section>
+
+    <footer class="foot">
+      <p>Emulácia ZX Spectrum 48K cez <a href="https://github.com/gasman/jsspeccy3" rel="noopener noreferrer">JSSpeccy 3</a> (Matt Westcott, <a href="/licence/COPYING.txt">GPL-3.0</a>). Didaktik M je s ním programovo kompatibilný, ale vlastné ROM a diskový systém Didaktiku tu nie sú emulované. Žiadne hry nie sú súčasťou stránky.</p>
+    </footer>
+  </main>
+
+  <script src="/jsspeccy/jsspeccy.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
