@@ -21,10 +21,15 @@ RUN npm ci --ignore-scripts --no-audit --no-fund \
  && rm -f dist/jsspeccy/*.map
 
 # ---------- 2) runtime: nginx bez root práv ----------
-# stable-alpine sa priebežne aktualizuje (1.27 už nie); apk upgrade dotiahne opravy, o ktoré obraz mešká
-FROM nginxinc/nginx-unprivileged:stable-alpine
-USER root
-RUN apk upgrade --no-cache && rm -f /etc/nginx/conf.d/default.conf
+# Oficiálny nginx:stable-alpine (nginxinc/nginx-unprivileged sa od 10/2026 neprestavuje a ostal na zraniteľnej 1.30.6).
+# Beh bez root práv nastavíme rovnako ako nginx-unprivileged: bez `user`, pid a temp súbory v /tmp (kontajner je read_only + tmpfs /tmp).
+FROM nginx:stable-alpine
+RUN apk upgrade --no-cache \
+ && rm -f /etc/nginx/conf.d/default.conf \
+ && sed -i '/^user /d' /etc/nginx/nginx.conf \
+ && sed -i 's,/run/nginx.pid,/tmp/nginx.pid,; s,/var/run/nginx.pid,/tmp/nginx.pid,' /etc/nginx/nginx.conf \
+ && sed -i '/^http {/a \    proxy_temp_path /tmp/proxy_temp;\n    client_body_temp_path /tmp/client_temp;\n    fastcgi_temp_path /tmp/fastcgi_temp;\n    uwsgi_temp_path /tmp/uwsgi_temp;\n    scgi_temp_path /tmp/scgi_temp;' /etc/nginx/nginx.conf \
+ && chown -R 101:0 /var/cache/nginx && chmod -R g+w /var/cache/nginx
 USER 101
 # bez application/wasm v mime.types by sa emulátor nespustil -> radšej zlyhať pri builde
 RUN grep -q 'application/wasm' /etc/nginx/mime.types
